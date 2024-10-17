@@ -3,9 +3,9 @@ services:
   web:
     build: .
     container_name: my-web-app-container
-    command: bash -c "sleep 10 && . /app/venv/bin/activate && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    command: bash -c "sleep 10 && ls app/ && app/venv/bin/activate && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     ports:
-      - "8080:80"
+      - "8000:80"
     volumes:
       - .:/app
     environment:
