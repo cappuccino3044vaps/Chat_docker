@@ -3,10 +3,10 @@
 service nginx start
 
 # Activate the virtual environment
-. /app/venv/bin/activate
+. /APP_DIR/venv/bin/activate
 
 # Apply Django migrations
-python manage.py migrate
+python /APP_DIR/app/manage.py migrate
 
 # Start the Django app
-exec python manage.py runserver 0.0.0.0:8000
+exec python /APP_DIR/app/manage.py runserver 0.0.0.0:8000
