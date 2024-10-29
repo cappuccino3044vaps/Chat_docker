@@ -9,4 +9,4 @@ service nginx start
 python /APP_DIR/app/manage.py migrate
 
 # Start the Django app
-exec python /APP_DIR/app/manage.py runserver 0.0.0.0:8000
+exec python /APP_DIR/app/manage.py runserver localhost:8000

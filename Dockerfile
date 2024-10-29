@@ -14,7 +14,7 @@ COPY . /APP_DIR
 RUN python3 -m venv venv
 # 仮想環境をアクティベートするための設定
 ENV PATH="/APP_DIR/venv/bin:$PATH"
-RUN /APP_DIR/venv/bin/activate && pip install --upgrade pip && pip install -r requirements.txt
+RUN /APP_DIR/venv/bin/pip install --upgrade pip && /APP_DIR/venv/bin/pip install -r requirements.txt
 
 COPY nginx.conf /etc/nginx/nginx.conf
 

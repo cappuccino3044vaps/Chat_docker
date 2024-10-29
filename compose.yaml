@@ -2,7 +2,7 @@ services:
   web:
     build: .
     container_name: my-web-app-container
-    command: bash -c ls .&& ls ./app/ &&"sleep 10 && ls /APP_DIR/ && . /APP_DIR/venv/bin/activate && python /APP_DIR/app/manage.py migrate && python /APP_DIR/app/manage.py runserver 0.0.0.0:8000"
+    command: bash -c "sleep 10 && . /APP_DIR/venv/bin/activate && python /APP_DIR/app/manage.py migrate && python /APP_DIR/app/manage.py runserver localhost:8000"
     ports:
       - "8000:8000"
     environment:
