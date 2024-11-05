@@ -1,43 +1,63 @@
+# db(MySQL),app(Django)のコンテナを作成
 services:
-  web:
-    build: .
-    container_name: my-web-app-container
-    command: bash -c "sleep 10 && . /APP_DIR/venv/bin/activate && python /APP_DIR/app/manage.py migrate && python /APP_DIR/app/manage.py runserver localhost:8000"
-    ports:
-      - "8000:8000"
-    environment:
-      - PYTHONUNBUFFERED=1
-    volumes:
-      - .:/APP_DIR
-    networks:
-      - webnet
-    depends_on:
-      - db
-
   db:
-    image: mysql:8.0
-    container_name: mysql-db
-    environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: mydb
-      MYSQL_USER: user
-      MYSQL_PASSWORD: password
+    # コンテナ名をmysqlに設定
+    container_name: mysql
+    # MySQLのDockerfileをビルドする
+    build:
+      # ビルドコンテキストはカレントディレクトリ
+      context: .
+      dockerfile: app/mysql/Dockerfile
+    # M1チップでも動くように
+    # Intel Macの場合あってもなくても動く
+    platform: linux/x86_64
+    # DBのボリュームを指定
+    # ローカルの/data/dbをコンテナの/var/lib/mysqlにマウントする
     volumes:
       - db_data:/var/lib/mysql
-    networks:
-      - webnet
-
-  nginx:
-    image: nginx:latest
-    container_name: nginx
-    ports:
-      - "8080:80"
+    # 環境変数を.envを使って設定
+    env_file:
+      - .env
+    # DBのコンテナのヘルスチェックを行う
+    # mysqladmin(MySQLサーバーの管理を行うクライアントを使ってDBコンテナ自身(127.0.0.1)にpingを送ってヘルスチェックを行う
+    healthcheck:
+      test: mysqladmin ping -h 127.0.0.1 -u$$MYSQL_USER -p$$MYSQL_PASSWORD
+      # ヘルスチェックのインターバルは10秒
+      interval: 10s
+      # タイムアウト時間は10秒
+      timeout: 10s
+      # リトライ回数は3回
+      retries: 3
+      # ヘルスチェックが失敗しても無視する時間は30秒
+      start_period: 30s
+  app:
+    # コンテナ名をappに設定
+    container_name: app
+    # DjangoのDockerfileをビルドする
+    build:
+      # ビルドコンテキストはカレントディレクトリ
+      context: .
+      dockerfile: app/django/Dockerfile
+    # ボリュームを指定
+    # ローカルのカレントディレクトリをコンテナの/codeにマウントする
+    # ローカルの/staticをコンテナの/staticにマウントする
     volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf
+      - .:/code
+      - ./static:/static
+    # ローカルの8000番ポートとコンテナの8000番ポートをつなぐ
+    ports:
+      - "8000:8000"
+    
+    # シェルスクリプトを実行
+    command: sh -c "./entrypoint.sh"
+    # 環境変数を.envを使って設定
+    env_file:
+      - .env
+    # 先にdbを起動してからappを起動する
     depends_on:
-      - web
-networks:
-  webnet:
-
+      db:
+        # dbのヘルスチェックが終わってからappを起動させる
+        condition: service_healthy
 volumes:
   db_data:
+  static:
