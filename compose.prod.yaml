@@ -1,6 +1,7 @@
 # db(MySQL),app(Django),web(Nginx)のコンテナを作成
 services:
   db:
+    image: mysql:8.0.28
     container_name: mysql
     build:
       context: .
