@@ -1,2 +1,2 @@
-Django+docker+DB勉強用リポジトリです。
+Django+docker+DBリポジトリです。
 何を作るかはまだ決めていません。
